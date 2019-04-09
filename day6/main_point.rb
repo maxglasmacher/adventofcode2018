@@ -1,4 +1,3 @@
-
 class MainPoint
   attr_accessor :distance_to_main, :x, :y, :closest_quadrant_one, :closest_quadrant_two, :closest_quadrant_three, :closest_quadrant_four, :infinite, :points
   def initialize(attributes = {})

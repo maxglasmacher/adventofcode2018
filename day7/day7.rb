@@ -122,9 +122,9 @@ ALPHABET = ("a".."z").to_a
 
 ALL_LETTERS = []
 
-TIME_ACTIVATED = ["c"]
+TIME_ACTIVATED = []
 
-WORKING_ON_ARRAY = ["n", "r", "f"]
+WORKING_ON_ARRAY = ["n", "r", "f", "c"]
 
 TIME_OPTIONS = []
 
@@ -142,17 +142,19 @@ def find_letter(letter)
   ALL_LETTERS.each do |instance|
     correct << instance if instance.letter == letter
   end
-  correct.join
+  correct[0]
 end
 
 # METHODS
 
+# UPDATE OPTIONS NOT WORKING!
+
 def update_options
   GRID.each do |letter, before_array|
-    if !TIME_ACTIVATED.include?(letter) && !TIME_OPTIONS.include?(letter) && !WORKING_ON_ARRAY.include?(letter) && (before_array - TIME_ACTIVATED).empty?
-      TIME_OPTIONS << letter
-    end
+    TIME_OPTIONS << letter.downcase if !TIME_ACTIVATED.include?(letter.downcase) && !WORKING_ON_ARRAY.include?(letter.downcase) && !TIME_OPTIONS.include?(letter.downcase) && (before_array.map(&:downcase) - TIME_ACTIVATED).empty?
   end
+  TIME_OPTIONS.sort!
+  p TIME_OPTIONS
 end
 
 def refill_working_on
@@ -162,37 +164,54 @@ def refill_working_on
       TIME_OPTIONS.delete_at(0)
     end
   end
+  WORKING_ON_ARRAY.each do |l|
+    p "#{find_letter(l).letter}, #{find_letter(l).left_time} seconds"
+  end
 end
 
-def update_time(activated_letter)
-  WORKING_ON_ARRAY.each do |instance|
+def update_time(activated_letter, array)
+  array.each do |instance|
     instance.left_time -= activated_letter.left_time
   end
+
 end
 
-def next_done
-  WORKING_ON_ARRAY.each_with_index do |letter, idx|
-    WORKING_ON_ARRAY[idx] = find_letter(letter) if letter.class == "String"
+def convert_working_on_array
+  correct_array = []
+  WORKING_ON_ARRAY.each do |letter|
+    correct_array << find_letter(letter)
   end
-  quickest_finished = WORKING_ON_ARRAY.sort_by { |obj| obj.left_time }.first
-  TIME_ACTIVATED << quickest_finished.letter
-  time += quickest_finished.left_time
-  WORKING_ON_ARRAY.delete(quickest_finished)
-  update_time(quickest_finished)
+  # p correct_array
+  correct_array
 end
 
 # WARNING WITH DOWNCASE!!!!
 
-time = 63
+time = 0
 
 until TIME_ACTIVATED.length == 26
+
+  # binding.pry
   update_options
   refill_working_on
-  next_done
+  quickest_finished = convert_working_on_array.sort_by { |obj| obj.left_time }.first
+
+    TIME_ACTIVATED << quickest_finished.letter
+    WORKING_ON_ARRAY.delete(quickest_finished.letter)
+    update_time(quickest_finished, convert_working_on_array)
+    time += quickest_finished.left_time
+
+  # binding.pry
   p TIME_ACTIVATED.join
+  p time
+
 end
 
 p time
+
+
+# TIME not added successfully
+
 
 # PLAN
 
